@@ -1,0 +1,61 @@
+---
+ - hosts: all
+   tasks:
+     - name: Add ansible/steve users, and change pi password
+       user:
+         name: '{{ item.name }}'
+         groups: '{{ item.groups }}'
+         password: '{{ item.password }}' 
+         uid: '{{ item.uid }}'
+       become: yes
+       with_items:
+         - { name: 'steve', groups: 'sudo', uid: 5000, password: '{{ vault_steve_password }}' }
+         - { name: 'ansible', groups: '', uid: 5001, password: '{{ vault_ansible_password }}' }
+         - { name: 'pi', groups: '', uid: 1000, password: '{{ vault_pi_password }}' }
+
+     - name: Add authorized keys to users
+       authorized_key:
+         user: '{{ item.name }}'
+         key: '{{ item.key }}'
+         state: present
+       become: yes
+       with_items:
+         - { name: 'steve', key: '{{ vault_steve_public_key }}' }
+         - { name: 'ansible', key: '{{ vault_ansible_public_key }}' }
+
+     - name: Copy private keys
+       copy:
+         dest: '/home/{{ item.name }}/.ssh/id_rsa'
+         content: '{{ item.key }}'
+         owner: '{{ item.name }}'
+         group: '{{ item.name }}'
+         mode: 0400
+       become: yes
+       no_log: yes
+       when: copy_private_keys is defined and copy_private_keys
+       with_items:
+         - { name: 'steve', key: '{{ vault_steve_private_key }}' }
+         - { name: 'ansible', key: '{{ vault_ansible_private_key }}' }
+
+     - name: Turn on sshd
+       service:
+         name: ssh
+         state: started
+         enabled: yes
+       become: yes
+
+     - name: Enable passwordless sudo for ansible
+       copy:
+         dest: /etc/sudoers.d/010_ansible-nopasswd
+         content: |
+           ansible ALL=(ALL) NOPASSWD: ALL
+         owner: 'root'
+         group: 'root'
+         mode: 0600
+       become: yes
+
+     - name: Disable pi sudo
+       file:
+         dest: /etc/sudoers.d/010_pi-nopasswd
+         state: absent
+       become: yes  
