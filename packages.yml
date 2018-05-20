@@ -1,0 +1,10 @@
+---
+ - hosts: rpi
+   tasks:
+     - name: Install packets
+       apt:
+         name: '{{ item }}'
+         state: latest
+       become: yes
+       with_items:
+         - emacs
