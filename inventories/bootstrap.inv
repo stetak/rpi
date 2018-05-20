@@ -1,3 +1,10 @@
 [bootstrap_node]
 bootstrap ansible_connection=local
 
+[rpi]
+rpi-orange
+
+
+[rpi:vars]
+ansible_user=ansible
+ansible_ssh_private_key_file=~/.ssh/ansible 
