@@ -1,11 +1,12 @@
 ---
- - hosts: all
+ - hosts: bootstrap_node
    tasks:
      - name: Add ansible/steve users, and change pi password
        user:
          name: '{{ item.name }}'
          groups: '{{ item.groups }}'
          password: '{{ item.password }}' 
+         skeleton: yes
          uid: '{{ item.uid }}'
        become: yes
        with_items:
@@ -23,19 +24,32 @@
          - { name: 'steve', key: '{{ vault_steve_public_key }}' }
          - { name: 'ansible', key: '{{ vault_ansible_public_key }}' }
 
-     - name: Copy private keys
+     - name: Copy private key to steve's home
        copy:
-         dest: '/home/{{ item.name }}/.ssh/{{ item.file }}'
+         dest: '/home/steve/.ssh/{{ item.file }}'
          content: '{{ item.key }}'
-         owner: '{{ item.name }}'
-         group: '{{ item.name }}'
+         owner: steve
+         group: steve
          mode: 0400
        become: yes
        no_log: yes
        when: copy_private_keys is defined and copy_private_keys
        with_items:
-         - { name: 'steve', file: 'id_rsa', key: '{{ vault_steve_private_key }}' }
-         - { name: 'ansible', file: 'ansible', key: '{{ vault_ansible_private_key }}' }
+         - { file: 'id_rsa', key: '{{ vault_steve_private_key }}' }
+         - { file: 'ansible', key: '{{ vault_ansible_private_key }}' }
+         - { file: 'git', key: '{{ vault_git_private_key }}' }
+
+     - name: Use git key for git
+       copy:
+         dest: /home/steve/.ssh/config
+         content: |
+           github.com
+           	IdentityFile ~/.ssh/git
+                IdentitiesOnly yes
+         owner: steve
+         group: steve
+         mode: 0600
+       become: yes 
 
      - name: Turn on sshd
        service:
