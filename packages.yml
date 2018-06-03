@@ -1,10 +1,11 @@
 ---
  - hosts: rpi
    tasks:
-     - name: Install packets
+     - name: Install packages
        apt:
          name: '{{ item }}'
          state: latest
        become: yes
        with_items:
          - emacs
+         - vim
