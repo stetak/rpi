@@ -7,6 +7,7 @@
          groups: '{{ item.groups }}'
          password: '{{ item.password }}' 
          skeleton: yes
+         shell: /bin/bash
          uid: '{{ item.uid }}'
        become: yes
        with_items:
@@ -43,9 +44,9 @@
        copy:
          dest: /home/steve/.ssh/config
          content: |
-           github.com
+           Host github.com
            	IdentityFile ~/.ssh/git
-                IdentitiesOnly yes
+           	IdentitiesOnly yes
          owner: steve
          group: steve
          mode: 0600
