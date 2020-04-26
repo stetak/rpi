@@ -27,8 +27,8 @@
        blockinfile:
          path: /etc/ssh/sshd_config
 	 block: |
-	   Match User pi
-	   PasswordAuthentication no
+           Match User pi
+           PasswordAuthentication no
        become: yes
 
      - name: Turn on sshd
