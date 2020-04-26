@@ -1,0 +1,30 @@
+---
+ - hosts: rpi
+   tasks:
+     - name: Copy private key to steve's home
+       copy:
+         dest: '/home/steve/.ssh/{{ item.file }}'
+         content: '{{ item.key }}'
+         owner: steve
+         group: steve
+         mode: 0400
+       become: yes
+       no_log: yes
+       when: copy_private_keys is defined and copy_private_keys
+       with_items:
+         - { file: 'id_rsa', key: '{{ vault_steve_private_key }}' }
+         - { file: 'ansible', key: '{{ vault_ansible_private_key }}' }
+         - { file: 'git', key: '{{ vault_git_private_key }}' }
+
+     - name: Use git key for git
+       copy:
+         dest: /home/steve/.ssh/config
+         content: |
+           Host github.com
+           	IdentityFile ~/.ssh/git
+           	IdentitiesOnly yes
+         owner: steve
+         group: steve
+         mode: 0600
+       become: yes 
+
