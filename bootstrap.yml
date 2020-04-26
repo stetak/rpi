@@ -5,8 +5,7 @@
        user:
          name: '{{ item.name }}'
          groups: '{{ item.groups }}'
-         password: '{{ item.password }}' 
-         skeleton: yes
+         password: '{{ item.password }}'
          shell: /bin/bash
          uid: '{{ item.uid }}'
        become: yes
