@@ -26,7 +26,7 @@
      - name: Only allow pi user login with key
        blockinfile:
          path: /etc/ssh/sshd_config
-	 block: |
+         block: |
            Match User pi
            PasswordAuthentication no
        become: yes
