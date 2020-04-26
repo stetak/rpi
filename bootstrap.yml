@@ -22,7 +22,15 @@
        become: yes
        with_items:
          - { name: 'steve', key: '{{ vault_steve_public_key }}' }
-         - { name: 'ansible', key: '{{ vault_ansible_public_key }}' }
+         - { name: 'pi', key: '{{ vault_pi_public_key }}' }
+
+     - name: Only allow pi user login with key
+       blockinfile:
+         path: /etc/ssh/sshd_config
+	 block: |
+	   Match User pi
+	   PasswordAuthentication no
+       become: yes
 
      - name: Turn on sshd
        service:
